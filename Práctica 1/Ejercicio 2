@@ -1,0 +1,30 @@
+program Ejercicio2;
+type
+  arenteros= file of integer;
+var
+  archivo: arenteros;
+  num: integer;
+  nombre_fisico: String;
+  mult: integer;
+  may:integer;
+begin
+  mult:= 0;
+  may:= 0;
+  write('Ingrese el nombre del archivo: ');
+  readln(nombre_fisico);
+  Assign(archivo,nombre_fisico);
+  Reset(archivo);
+  while (not eof(archivo)) do
+    begin
+    read(archivo, num);
+    write(num,' ');
+    if ((num mod 2) = 0) then
+      mult:= mult+1;
+    if (num>100000) then
+        may:= may+1;
+    end;
+  close(archivo);
+  writeln();
+  write('Hay ', mult, ' numeros multiplos de 2 y ', may, ' numeros mayores a 100000.');
+  readln();
+end.         
