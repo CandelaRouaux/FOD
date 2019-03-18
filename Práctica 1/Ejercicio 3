@@ -1,0 +1,114 @@
+program Ej3;
+type
+  personas= record
+    apellido: String[30];
+    nombre: String[30];
+    edad: integer;
+    dni: String[10];
+  end;
+  archpersonas= file of personas;
+procedure Leer (var p:personas);
+begin
+  write('Ingrese el apellido: ');
+  readln(p.apellido);
+  if (p.apellido<>'') then
+  begin
+    write('Ingrese el nombre: ');
+    readln(p.nombre);
+    write('Ingrese la edad: ');
+    readln(p.edad);
+    write('Ingrese el dni: ');
+    readln(p.dni);
+  end;
+end;
+procedure crearArchivo (var archivo:archpersonas);
+var
+  per: personas;
+begin
+  Rewrite(archivo);
+  Leer(per);
+  while (per.apellido<>'') do
+  begin
+    write(archivo,per);
+    Leer(per);
+  end;
+  Close(archivo);
+end;
+procedure imprimirPersona(per: personas);
+begin
+  with per do
+    writeln(apellido,' ',nombre,' ',edad,' ', dni);
+end;
+procedure listarUnApellido(var archivo: archpersonas);
+var
+  per: personas;
+  apellido: String;
+begin
+  write('Ingresar el apellido a imprimir: ');
+  readln(apellido);
+  Reset(archivo);
+  while (not eof(archivo)) do
+  begin
+    read(archivo, per);
+    if(per.apellido = apellido) then
+      imprimirPersona(per);
+  end;
+  Close(archivo);
+end;
+procedure listarPorLinea(var archivo: archpersonas);
+var
+  per: personas;
+begin
+  Reset(archivo);
+  while (not eof(archivo)) do
+  begin
+    read(archivo,per);
+    imprimirPersona(per);
+  end;
+  Close(archivo);
+end;
+procedure listarMayores(var archivo: archpersonas);
+var
+  per: personas;
+begin
+  Reset(archivo);
+  while (not eof(archivo)) do
+  begin
+    read(archivo, per);
+    if(per.edad >= 18) then
+      imprimirPersona(per);
+  end;
+  Close(archivo);
+end;
+var
+  archivo: archpersonas;
+  opcion: integer;
+  nombre_fisico: String;
+begin
+  writeln('INGRESE:');
+  writeln('   1 - Crear un archivo de personas.');
+  writeln('   2 - Listar en pantalla un apellido determinado.');
+  writeln('   3 - Listar en pantalla por linea.');
+  writeln('   4 - Listar en pantalla personas mayores de 18.');
+  writeln('   0 - Finalizar.');
+  write('Ingrese su opcion: ');
+  readln(opcion);
+  write('Ingrese el nombre del archivo a crear/leer: ');
+  readln(nombre_fisico);
+  Assign(archivo, nombre_fisico);
+  while(opcion<>0) do
+  begin
+    case opcion of
+      1: crearArchivo(archivo);
+      2: listarUnApellido(archivo);
+      3: listarPorLinea(archivo);
+      4: listarMayores(archivo);
+    else
+      writeln('El numero ingresado no es valido.');
+    end;
+    write('Ingrese su opcion: ');
+    readln(opcion);
+  end;
+  writeln('El programa finalizo.');
+readln();
+end.
