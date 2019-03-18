@@ -1,0 +1,23 @@
+program Ej1;
+type
+  arenteros= file of integer;
+var
+  archivo: arenteros;
+  num: integer;
+  nombre_fisico: String;
+begin
+  write('Ingrese el nombre del archivo: ');
+  readln(nombre_fisico);
+  Assign(archivo,nombre_fisico);
+  Rewrite(archivo);
+  write('Ingrese un numero entero: ');
+  readln(num);
+  while (num<>0) do
+  begin
+    write(archivo,num);
+    write('Ingrese un numero entero: ');
+    readln(num);
+  end;
+  close(archivo);
+  readln();
+end.        
