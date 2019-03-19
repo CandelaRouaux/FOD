@@ -1,0 +1,189 @@
+program Ej6;
+type
+  articulo = record
+    nombre: String[20];
+    descripcion: String[30];
+    precio: real;
+    stock: integer;
+  end;
+  archzapa = file of articulo;
+procedure crearArchivo(var archivo: archzapa; var carga: Text);
+var
+  art: articulo;
+begin
+  Reset(carga);
+  Rewrite(archivo);
+  while(not eof(carga)) do
+  begin
+    readln(carga, art.precio, art.nombre);
+    readln(carga, art.stock, art.descripcion);
+    write(archivo, art);
+  end;
+  Close(carga);
+  Close(archivo);
+end;
+procedure imprimirArticulo(art:articulo);
+begin
+  with art do
+    writeln(nombre, ' ', precio:2:2, ' ', stock, ' ', descripcion);
+end;
+procedure listadoMenorACien(var archivo: archzapa);
+var
+  art:articulo;
+begin
+  Reset(archivo);
+  while (not eof(archivo)) do
+  begin
+    read(archivo,art);
+    if (art.stock<100) then
+       imprimirArticulo(art);
+  end;
+  Close(archivo);
+end;
+procedure listarConCadena(var archivo: archzapa);
+var
+  art: articulo;
+  cadena: String[30];
+  esta: integer;
+begin
+  Reset(archivo);
+  write('Ingrese la cadena de caracteres a buscar en la descripcion: ');
+  readln(cadena);
+  while(not eof(archivo)) do
+  begin
+    read(archivo, art);
+    esta:= Pos(cadena,art.descripcion);
+    if(esta<>0) then
+       imprimirArticulo(art);
+  end;
+  Close(archivo);
+end;
+procedure exportarArchivo(var archivo:archzapa; var carga: Text);
+var
+  art:articulo;
+begin
+  Reset(archivo);
+  Rewrite (carga);
+  while(not eof(archivo))do
+  begin
+    read(archivo, art);
+    writeln(carga, art.nombre, ' ',art.precio,' ',art.stock,' ',art.descripcion);
+  end;
+  Close(archivo);
+  Close(carga);
+end;
+procedure Leer (var art:articulo);
+begin
+  write('Ingrese el nombre de un articulo: ');
+  readln(art.nombre);
+  write('Ingrese el stock del articulo: ');
+  readln(art.stock);
+  write('Ingrese el precio del articulo: ');
+  readln(art.precio);
+  write('Ingrese la descripcion del articulo: ');
+  readln(art.descripcion);
+end;
+procedure agregarArticulo(var archivo:archzapa);
+var
+  art:articulo;
+  cant: integer;
+  i: integer;
+begin
+  Reset(archivo);
+  write('Ingrese la cantidad de articulos que va a agregar: ');
+  readln(cant);
+  seek(archivo, fileSize(archivo));
+  for i:= 1 to cant do
+  begin
+    Leer(art);
+    write(archivo,art);
+  end;
+  Close(archivo);
+end;
+procedure modificarStock (var archivo:archzapa);
+var
+  nombre: String[20];
+  stock: integer;
+  encontre: boolean;
+  art: articulo;
+begin
+  write('Ingrese el nombre del articulo al cual se le va a modificar el stock: ');
+  readln(nombre);
+  Reset(archivo);
+  encontre:= False;
+  while (not eof(archivo))and (not encontre) do
+  begin
+    read(archivo,art);
+    if (art.nombre=nombre) then
+      encontre := True;
+  end;
+  if (encontre) then
+  begin
+    write('Ingrese el nuevo stock: ');
+    read(stock);
+    art.stock:= stock;
+    seek(archivo, filePos(archivo)-1);
+    write(archivo, art);
+  end;
+  Close(archivo);
+end;
+procedure exportarSinStock (var archivo: archzapa; var carga: Text);
+var
+  art: articulo;
+begin
+  Reset(archivo);
+  Rewrite(carga);
+  while (not eof(archivo)) do
+  begin
+    read(archivo, art);
+    if(art.stock = 0) then
+      with art do
+        writeln(carga, nombre,' ', precio, ' ', stock,' ', descripcion);
+  end;
+  Close(archivo);
+  Close(carga);
+end;
+var
+  archivo: archzapa;
+  zapat: Text;
+  expor: Text;
+  sinstock: Text;
+  opcion: integer;
+  nombre_fisico: String;
+begin
+  writeln('INGRESE:');
+  writeln('   1 - Crear un archivo de registro de zapateria');
+  writeln('   2 - Listar en pantalla los articulos cuyo stock sea menor a 100.');
+  writeln('   3 - Listar en pantalla los archivos que contengan en su descripcion una cadena ingresada.');
+  writeln('   4 - Exportar el archivo a zapateria.txt.');
+  writeln('   5 - Agregar un articulo al final del archivo.');
+  writeln('   6 - Modificar el stock de un articulo.');
+  writeln('   7 - Exportar los articulos sin stock.');
+  writeln('   0 - Finalizar.');
+  write('Ingrese su opcion: ');
+  readln(opcion);
+  write('Ingrese el nombre del archivo a crear/leer: ');
+  readln(nombre_fisico);
+  Assign(archivo, nombre_fisico);
+  Assign(zapat,'zapatos.txt');
+  Assign(expor, 'zapateria.txt');
+  Assign(sinstock,'SinStock.txt');
+  while(opcion<>0) do
+  begin
+    case opcion of
+      1: crearArchivo(archivo, zapat);
+      2: listadoMenorACien(archivo);
+      3: listarConCadena(archivo);
+      4: exportarArchivo(archivo,expor);
+      5: agregarArticulo(archivo);
+      6: modificarStock(archivo);
+      7: exportarSinStock(archivo, sinstock);
+    else
+      writeln('El numero ingresado no es valido.');
+    end;
+    write('Ingrese su opcion: ');
+    readln(opcion);
+  end;
+  writeln('El programa finalizo.');
+readln();
+end. 
