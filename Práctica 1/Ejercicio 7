@@ -1,0 +1,133 @@
+program Ej7;
+type
+  novela = record
+    codigo: integer;
+    nombre: String[30];
+    genero: String[30];
+    precio: real;
+  end;
+  archnovelas= file of novela;
+procedure crearArchivo (var archivo:archnovelas; var carga:Text);
+var
+  nov: novela;
+begin
+  Reset(carga);
+  Rewrite(archivo);
+  while(not eof(carga)) do
+  begin
+    readln(carga,nov.codigo, nov.precio, nov.genero);
+    readln(carga, nov.nombre);
+    write(archivo, nov);
+  end;
+  Close(carga);
+  Close(archivo);
+end;
+procedure Leer (var nov: novela);
+begin
+  write('Ingrese el codigo de la nueva novela: ');
+  readln(nov.codigo);
+  write('Ingrese el nombre de la nueva novela: ');
+  readln(nov.nombre);
+  write('Ingrese el genero de la nueva novela: ');
+  readln(nov.genero);
+  write('Ingrese el precio de la nueva novela: ');
+  readln(nov.precio);
+end;
+procedure agregarNovela(var archivo:archnovelas);
+var
+  nov: novela;
+begin
+  Reset(archivo);
+  seek(archivo, fileSize(archivo));
+  Leer(nov);
+  write(archivo,nov);
+  Close(archivo);
+end;
+procedure modificarNombre (var nov:novela);
+begin
+  write('Ingrese el nuevo nombre: ');
+  readln(nov.nombre);
+end;
+procedure modificarPrecio (var nov:novela);
+begin
+  write('Ingrese el nuevo precio: ');
+  readln(nov.precio);
+end;
+procedure modificarGenero (var nov:novela);
+begin
+  write('Ingrese el nuevo genero: ');
+  readln(nov.genero);
+end;
+procedure modificarCodigo (var nov:novela);
+begin
+  write('Ingrese el nuevo codigo: ');
+  readln(nov.codigo);
+end;
+procedure modificarNovela (var archivo:archnovelas);
+var
+  codigo: integer;
+  encontre: boolean;
+  nov: novela;
+  opcion: integer;
+begin
+  write('Ingrese el codigo de la novela que va a modificar: ');
+  readln(codigo);
+  Reset(archivo);
+  encontre:= False;
+  while (not eof(archivo))and (not encontre) do
+  begin
+    read(archivo,nov);
+    if (nov.codigo=codigo) then
+      encontre := True;
+  end;
+  if (encontre) then
+  begin
+    writeln('INGRESE:');
+    writeln('   1 - Modificar el nombre');
+    writeln('   2 - Modificar el precio');
+    writeln('   3 - Modificar el genero');
+    writeln('   3 - Modificar el codigo');
+    write('Ingrese su opcion: ');
+    readln(opcion);
+    case opcion of
+      1: modificarNombre(nov);
+      2: modificarPrecio(nov);
+      3: modificarGenero(nov);
+      4: modificarCodigo(nov);
+    else
+      writeln('El numero ingresado no es valido.');
+    end;
+    seek(archivo, filePos(archivo)-1);
+    write(archivo, nov);
+  end;
+  Close(archivo);
+end;
+var
+  archivo: archnovelas;
+  novelas: Text;
+  opcion: integer;
+begin
+  writeln('INGRESE:');
+  writeln('   1 - Crear un archivo de novelas a partir de un archivo de texto.');
+  writeln('   2 - Agregar una novela al archivo.');
+  writeln('   3 - Modificar la informacion de una novela existente.');
+  writeln('   0 - Finalizar.');
+  write('Ingrese su opcion: ');
+  readln(opcion);
+  Assign(archivo, 'novelas.dat');
+  Assign(novelas,'novelas.txt');
+  while(opcion<>0) do
+  begin
+    case opcion of
+      1: crearArchivo(archivo, novelas);
+      2: agregarNovela(archivo);
+      3: modificarNovela(archivo);
+    else
+      writeln('El numero ingresado no es valido.');
+    end;
+    write('Ingrese su opcion: ');
+    readln(opcion);
+  end;
+  writeln('El programa finalizo.');
+readln();
+end. 
