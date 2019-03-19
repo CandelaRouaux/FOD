@@ -1,0 +1,205 @@
+program Ej4;
+type
+  personas= record
+    apellido: String[30];
+    nombre: String[30];
+    edad: integer;
+    dni: String[10];
+  end;
+  archpersonas= file of personas;
+procedure Leer (var p:personas);
+begin
+  write('Ingrese el apellido: ');
+  readln(p.apellido);
+  if (p.apellido<>'') then
+  begin
+    write('Ingrese el nombre: ');
+    readln(p.nombre);
+    write('Ingrese la edad: ');
+    readln(p.edad);
+    write('Ingrese el dni: ');
+    readln(p.dni);
+  end;
+end;
+procedure crearArchivo (var archivo:archpersonas);
+var
+  per: personas;
+begin
+  Rewrite(archivo);
+  Leer(per);
+  while (per.apellido<>'') do
+  begin
+    write(archivo,per);
+    Leer(per);
+  end;
+  Close(archivo);
+end;
+procedure imprimirPersona(per: personas);
+begin
+  with per do
+    writeln(apellido,' ',nombre,' ',edad,' ', dni);
+end;
+procedure listarUnApellido(var archivo: archpersonas);
+var
+  per: personas;
+  apellido: String;
+begin
+  write('Ingresar el apellido a imprimir: ');
+  readln(apellido);
+  Reset(archivo);
+  while (not eof(archivo)) do
+  begin
+    read(archivo, per);
+    if(per.apellido = apellido) then
+      imprimirPersona(per);
+  end;
+  Close(archivo);
+end;
+procedure listarPorLinea(var archivo: archpersonas);
+var
+  per: personas;
+begin
+  Reset(archivo);
+  while (not eof(archivo)) do
+  begin
+    read(archivo,per);
+    imprimirPersona(per);
+  end;
+  Close(archivo);
+end;
+procedure listarMayores(var archivo: archpersonas);
+var
+  per: personas;
+begin
+  Reset(archivo);
+  while (not eof(archivo)) do
+  begin
+    read(archivo, per);
+    if(per.edad >= 18) then
+      imprimirPersona(per);
+  end;
+  Close(archivo);
+end;
+procedure agregarPersona (var archivo: archpersonas);
+var
+  per: personas;
+begin
+  Reset(archivo);
+  seek(archivo, fileSize(archivo));
+  Leer(per);
+  write(archivo,per);
+  Close(archivo);
+end;
+procedure modificarEdad (var archivo:archpersonas);
+var
+  apellido: String[30];
+  nombre: String [30];
+  edad: integer;
+  per: personas;
+  num:integer;
+  i: integer;
+  encontre: boolean;
+begin
+  Reset(archivo);
+  write('Ingrese la cantidad de edades que quiere modificar: ');
+  readln(num);
+  for i:= 1 to num do
+  begin
+    encontre:= False;
+    write('Ingrese el apellido al cual se va a cambiar la edad: ');
+    readln(apellido);
+    write('Ingrese el nombre al cual se va a cambiar la edad: ');
+    readln(nombre);
+    Reset(archivo);
+    while (not eof(archivo))and (not encontre) do
+    begin
+      read(archivo,per);
+      if ((per.apellido = apellido) and (per.nombre=nombre)) then
+         encontre := True;
+    end;
+    if (encontre) then
+      begin
+        write('Ingrese la edad nuevo: ');
+        read(edad);
+        per.edad:= edad;
+        seek(archivo, filePos(archivo)-1);
+        write(archivo, per);
+      end;
+  end;
+  Close(archivo);
+end;
+procedure exportarArchivo (var archivo: archpersonas; var carga: Text);
+var
+  per:personas;
+begin
+  Reset(archivo);
+  Rewrite(carga);
+  while (not eof(archivo)) do
+  begin
+    read(archivo, per);
+    with per do
+      writeln(carga, apellido,' ', nombre,' ', edad,' ', dni);
+  end;
+  Close(archivo);
+  Close(carga);
+end;
+procedure exportarErroneos (var archivo: archpersonas; var carga: Text);
+var
+  per:personas;
+begin
+  Reset(archivo);
+  Rewrite(carga);
+  while (not eof(archivo)) do
+  begin
+    read(archivo, per);
+    if(per.dni = '0') then
+      with per do
+        writeln(carga, apellido,' ', nombre,' ', edad,' ', dni);
+  end;
+  Close(archivo);
+  Close(carga);
+end;
+var
+  archivo: archpersonas;
+  opcion: integer;
+  nombre_fisico: String;
+  persona: Text;
+  erroneos: Text;
+begin
+  writeln('INGRESE:');
+  writeln('   1 - Crear un archivo de personas.');
+  writeln('   2 - Listar en pantalla un apellido determinado.');
+  writeln('   3 - Listar en pantalla por linea.');
+  writeln('   4 - Listar en pantalla personas mayores de 18.');
+  writeln('   5 - Agregar una persona.');
+  writeln('   6 - Modificar una edad.');
+  writeln('   7 - Exportar archivo a un archivo de texto.');
+  writeln('   8 - Exportar personas sin dni cargado.');
+  writeln('   0 - Finalizar.');
+  write('Ingrese su opcion: ');
+  readln(opcion);
+  write('Ingrese el nombre del archivo a crear/leer: ');
+  readln(nombre_fisico);
+  Assign(archivo, nombre_fisico);
+  Assign(persona, 'personas.txt');
+  Assign(erroneos, 'erroneos.txt');
+  while(opcion<>0) do
+  begin
+    case opcion of
+      1: crearArchivo(archivo);
+      2: listarUnApellido(archivo);
+      3: listarPorLinea(archivo);
+      4: listarMayores(archivo);
+      5: agregarPersona(archivo);
+      6: modificarEdad(archivo);
+      7: exportarArchivo(archivo, persona);
+      8: exportarErroneos(archivo, erroneos);
+    else
+      writeln('El numero ingresado no es valido.');
+    end;
+    write('Ingrese su opcion: ');
+    readln(opcion);
+  end;
+  writeln('El programa finalizo.');
+readln();
+end. 
