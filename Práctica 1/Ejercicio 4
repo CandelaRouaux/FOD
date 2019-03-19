@@ -127,7 +127,7 @@ begin
     if (encontre) then
       begin
         write('Ingrese la edad nuevo: ');
-        read(edad);
+        readln(edad);
         per.edad:= edad;
         seek(archivo, filePos(archivo)-1);
         write(archivo, per);
@@ -209,4 +209,4 @@ begin
   end;
   writeln('El programa finalizo.');
 readln();
-end.            
+end.
