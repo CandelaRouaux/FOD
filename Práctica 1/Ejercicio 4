@@ -83,11 +83,18 @@ end;
 procedure agregarPersona (var archivo: archpersonas);
 var
   per: personas;
+  cant: integer;
+  i: integer;
 begin
   Reset(archivo);
   seek(archivo, fileSize(archivo));
-  Leer(per);
-  write(archivo,per);
+  write('Ingrese la cantidad de personas a agregar: ');
+  readln(cant);
+  for i:= 1 to cant do
+  begin
+    Leer(per);
+    write(archivo,per);
+  end;
   Close(archivo);
 end;
 procedure modificarEdad (var archivo:archpersonas);
@@ -110,7 +117,7 @@ begin
     readln(apellido);
     write('Ingrese el nombre al cual se va a cambiar la edad: ');
     readln(nombre);
-    Reset(archivo);
+    seek(archivo,0);
     while (not eof(archivo))and (not encontre) do
     begin
       read(archivo,per);
@@ -171,7 +178,7 @@ begin
   writeln('   2 - Listar en pantalla un apellido determinado.');
   writeln('   3 - Listar en pantalla por linea.');
   writeln('   4 - Listar en pantalla personas mayores de 18.');
-  writeln('   5 - Agregar una persona.');
+  writeln('   5 - Agregar una o mas personas.');
   writeln('   6 - Modificar una edad.');
   writeln('   7 - Exportar archivo a un archivo de texto.');
   writeln('   8 - Exportar personas sin dni cargado.');
@@ -202,4 +209,4 @@ begin
   end;
   writeln('El programa finalizo.');
 readln();
-end. 
+end.            
