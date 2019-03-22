@@ -1,0 +1,42 @@
+program Ej1;
+const
+  valoralto=9999;
+type
+  empleados = record
+    codigo: integer;
+    nombre: String[10];
+    monto: real;
+  end;
+  arcempleados = file of empleados;
+procedure leer (var archivo:arcempleados; var dato:empleados);
+begin
+ if (not eof(archivo))then
+    read (archivo,dato)
+ else
+   dato.codigo := valoralto;
+ end;
+var
+  arnuevo: arcempleados;
+  arviejo: arcempleados;
+  emp:empleados;
+  actual: empleados;
+begin
+  Assign(arviejo, 'Empleados.dat');
+  Assign(arnuevo, 'EmpleadosN.dat');
+  Reset(arviejo);
+  Rewrite(arnuevo);
+  leer(arviejo,emp);
+  while(emp.codigo<>valoralto) do
+  begin
+    actual:= emp;
+    actual.monto:= 0;
+    while (emp.codigo=actual.codigo) do
+    begin
+      actual.monto:= actual.monto+emp.monto;
+      leer(arviejo,emp);
+    end;
+    write(arnuevo,actual);
+  end;
+  Close(arviejo);
+  Close(arnuevo);
+end.
