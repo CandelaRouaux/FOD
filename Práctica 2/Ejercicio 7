@@ -1,0 +1,60 @@
+program Ej7;
+const
+  valorAlto=999999;
+type
+  mesas = record
+    codprov: integer;
+    codloc: integer;
+    numesa: integer;
+    cantvotos: integer;
+  end;
+  archmesas= file of mesas;
+procedure leer(var archivo: archmesas; var mesa: mesas);
+begin
+  if(not eof(archivo))then
+    read(archivo, mesa)
+  else
+    mesa.codprov:= valorAlto;
+end;
+procedure listarReporte(var archivo: archmesas);
+var
+  mesa: mesas;
+  actual: mesas;
+  votosloc: integer;
+  votosprov: integer;
+  totalgen:integer;
+begin
+  totalgen:=0;
+  leer(archivo, mesa);
+  while(mesa.codprov<>valorAlto) do
+  begin
+    actual:= mesa;
+    writeln('Codigo de Provincia: ', mesa.codprov);
+    votosprov:= 0;
+    while (actual.codprov=mesa.codprov) do
+    begin
+      actual.codloc:= mesa.codloc;
+      votosloc:= 0;
+      while(actual.codloc=mesa.codloc)and(actual.codprov=mesa.codprov)do
+      begin
+        votosloc:= votosloc + mesa.cantvotos;
+        votosprov:= votosprov + mesa.cantvotos;
+        totalgen:= totalgen+ mesa.cantvotos;
+        leer(archivo, mesa);
+      end;
+      writeln(actual.codloc,'   ', votosloc);
+    end;
+    writeln('Total de Votos Provincia: ', votosprov);
+    writeln();
+  end;
+  writeln('Total General de Votos: ', totalgen);
+end;
+var
+  archivo: archmesas;
+begin
+  Assign(archivo, 'mesas.dat');
+  Reset(archivo);
+  listarReporte(archivo);
+  Close(archivo);
+  readln();
+end.                                 
