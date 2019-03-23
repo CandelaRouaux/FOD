@@ -1,0 +1,120 @@
+program Ej4;
+const
+  valorAlto = 99999;
+type
+  Fecha = record
+    dia: 1..31;
+    mes: 1..12;
+    ano: 1900..2018;
+  end;
+  maquina = record
+    cod_usuario: integer;
+    fecha: Fecha;
+    tiempo_sesion: real;
+  end;
+  maes = record
+    cod_usuario: integer;
+    fecha: Fecha;
+    tiempo_total_de_sesiones_abiertas: real;
+  end;
+  archdetalle = file of maquina;
+  archmaestro = file of maes;
+  vec1 = array [1..5] of archdetalle;
+  vec2 = array [1..5] of maquina;
+procedure leer (var archivo:archdetalle; var dato:maquina);
+begin
+  if (not eof(archivo))then
+    read (archivo,dato)
+  else
+    dato.cod_usuario:= valoralto;
+end;
+function esMenor(fecha1: Fecha; fecha2: Fecha): boolean;
+begin
+  if(fecha1.ano>fecha2.ano) then
+    esMenor:= False
+  else
+      if(fecha1.ano = fecha2.ano) then
+        if (fecha1.mes>fecha2.mes) then
+          esMenor:= False
+        else
+          if(fecha1.mes = fecha2.mes) then
+            if(fecha1.dia<fecha2.dia) then
+              esMenor:= True
+            else
+              esMenor:= False
+          else
+            esMenor:= True
+      else
+          esMenor:= True;
+end;
+function esIgual(fecha1: Fecha; fecha2: Fecha): boolean;
+begin
+  esIgual:=(fecha1.ano=fecha2.ano)and(fecha1.mes=fecha2.mes) and(fecha1.dia=fecha2.dia);
+end;
+
+procedure minimo (var vecDetalle: vec2; var min: maquina; var v: vec1);
+var
+  i: integer;
+  pos : integer;
+begin
+  min.cod_usuario:= valorAlto;
+  for i:= 1 to 5 do
+  begin
+    if (vecDetalle[i].cod_usuario<min.cod_usuario) then
+    begin
+      min:= vecDetalle[i];
+      pos:= i;
+    end
+    else
+      if(vecDetalle[i].cod_usuario=min.cod_usuario) then
+        if (esMenor(vecDetalle[i].fecha,min.fecha)) then
+        begin
+          min:= vecDetalle[i];
+          pos:= i;
+        end;
+  end;
+  leer(v[pos],vecDetalle[pos]);
+end;
+procedure actualizarMaestro (var maestro:archmaestro; var v: vec1);
+var
+  regM: maes;
+  regD: vec2;
+  i: integer;
+  min: maquina;
+begin
+  for i:= 1 to 5 do
+      leer(v[i], regD[i]);
+  minimo(regD,min,v);
+  while(min.cod_usuario<>valorAlto) do
+  begin
+    regM.cod_usuario:= min.cod_usuario;
+    regM.fecha:= min.fecha;
+    regM.tiempo_total_de_sesiones_abiertas:=0;
+    while (min.cod_usuario = regM.cod_usuario) and (esIgual(min.fecha,regM.fecha)) do
+    begin
+       regM.tiempo_total_de_sesiones_abiertas:=regM.tiempo_total_de_sesiones_abiertas + min.tiempo_sesion;
+       minimo(regD,min,v);
+    end;
+    write(maestro, regM);
+  end;
+end;
+var
+  maestro: archmaestro;
+  v : vec1;
+  i: integer;
+begin
+  Assign(maestro, 'MaestroEj4/var/log');
+  Assign(v[1], 'Maquina 1');
+  Assign(v[2], 'Maquina 2');
+  Assign(v[3], 'Maquina 3');
+  Assign(v[4], 'Maquina 4');
+  Assign(v[5], 'Maquina 5');
+  Rewrite(maestro);
+  for i:= 1 to 5 do
+    Reset(v[i]);
+  actualizarMaestro(maestro,v);
+  for i:= 1 to 5 do
+    Close(v[i]);
+  Close(maestro);
+  readln();
+end.
