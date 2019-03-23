@@ -1,0 +1,161 @@
+program Ej5;
+const
+  valorAlto= 999999;
+type
+  producto = record
+    codigo: integer;
+    nombre: String[10];
+    precio: real;
+    stocka: integer;
+    stockm: integer;
+  end;
+  ventas = record
+    codigo: integer;
+    cantvendida: integer;
+  end;
+  archmaestro = file of producto;
+  archdetalle = file of ventas;
+procedure leer (var archivo:archdetalle; var dato:ventas);
+begin
+  if (not eof(archivo))then
+    read (archivo,dato)
+  else
+    dato.codigo := valorAlto;
+end;
+procedure crearMaestro(var maestro: archmaestro; var carga: Text);
+var
+  prod: producto;
+begin
+  Reset(carga);
+  Rewrite(maestro);
+  while(not eof(carga)) do
+  begin
+    readln(carga, prod.codigo, prod.nombre);
+    readln(carga, prod.precio, prod.stocka, prod.stockm);
+    write(maestro, prod);
+  end;
+  Close(carga);
+  Close(maestro);
+end;
+procedure listadoMaestro(var maestro: archmaestro; var carga: Text);
+var
+  prod: producto;
+begin
+  Rewrite(carga);
+  Reset(maestro);
+  while(not eof(maestro)) do
+  begin
+    read(maestro, prod);
+    write(carga,prod.codigo, ' ', prod.nombre,' ', prod.precio,' ', prod.stocka,' ', prod.stockm);
+  end;
+  Close(carga);
+  Close(maestro);
+end;
+procedure crearDetalle(var detalle: archdetalle; var carga: Text);
+var
+  ven: ventas;
+begin
+  Reset(carga);
+  Rewrite(detalle);
+  while(not eof(carga)) do
+  begin
+    read(carga, ven.codigo, ven.cantvendida);
+    write(detalle, ven);
+  end;
+  Close(carga);
+  Close(detalle);
+end;
+procedure listadoDetalle( var detalle: archDetalle);
+var
+  ven: ventas;
+begin
+  Reset(detalle);
+  while(not eof(detalle)) do
+  begin
+    read(detalle,ven);
+    writeln(ven.codigo, ' ', ven.cantvendida);
+  end;
+  Close(detalle);
+end;
+procedure actualizarMaestro(var maestro:archmaestro; var detalle:archdetalle);
+var
+  regM: producto;
+  regD: ventas;
+begin
+  Reset(maestro);
+  Reset(detalle);
+  leer(detalle, regD);
+  while(regD.codigo<>valorAlto) do
+  begin
+    read(maestro, regM);
+    while(regM.codigo<>regD.codigo)do
+      read(maestro,regM);
+    while(regM.codigo = regD.codigo)do
+    begin
+      regM.stocka:= regM.stocka - regD.cantvendida;
+      leer(detalle,regD);
+    end;
+    seek(maestro, fileSize(maestro)-1);
+    write(maestro, regM);
+  end;
+  Close(maestro);
+  Close(detalle);
+end;
+procedure exportarStockMinimo(var maestro:archmaestro; var carga:Text);
+var
+  prod: producto;
+begin
+  Reset(maestro);
+  Rewrite(carga);
+  while(not eof(maestro)) do
+  begin
+    read(maestro, prod);
+    if(prod.stocka< prod.stockm) then
+      write(carga, prod.nombre);
+  end;
+  Close(carga);
+  Close(maestro);
+end;
+var
+  maestro: archmaestro;
+  detalle: archdetalle;
+  cargaMaestro: Text;
+  cargaDetalle: Text;
+  opcion: integer;
+  reporteMaestro: Text;
+  reporteStockMinimo: Text;
+begin
+  Assign(maestro, 'Productos');
+  Assign(detalle, 'Ventas');
+  Assign(cargaMaestro, 'productos.txt');
+  Assign(cargaDetalle, 'ventas.txt');
+  Assign(reporteMaestro, 'reporte.txt');
+  Assign(reporteStockMinimo, 'stock_minimo.txt');
+  writeln('INGRESE:');
+  writeln('   1 - Crear el archivo maestro  a partir del archivo de texto productos.txt.');
+  writeln('   2 - Listar el contenido del maestro en el archivo de texto reporte.txt.');
+  writeln('   3 - Crear el archivo detalle a partir del archivo de texto ventas.txt.');
+  writeln('   4 - Listar en pantalla el contenido del detalle.');
+  writeln('   5 - Actualizar el archivo maestro con el archivo detalle.');
+  writeln('   6 - Exportar los articulos por debajo del stock minimo a stock_minimo.txt.');
+  writeln('   0 - Finalizar.');
+  write('Ingrese su opcion: ');
+  readln(opcion);
+  while(opcion<>0) do
+  begin
+    case opcion of
+      1: crearMaestro(maestro, cargaMaestro);
+      2: listadoMaestro(maestro,reporteMaestro);
+      3: crearDetalle(detalle, cargaDetalle);
+      4: listadoDetalle(detalle);
+      5: actualizarMaestro(maestro,detalle);
+      6: exportarStockMinimo(maestro,reporteStockMinimo);
+    else
+      writeln('El numero ingresado no es valido.');
+    end;
+    write('Ingrese su opcion: ');
+    readln(opcion);
+  end;
+  writeln('El programa finalizo.');
+readln();
+end.                                                                          
