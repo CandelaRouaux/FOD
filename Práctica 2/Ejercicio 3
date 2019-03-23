@@ -1,0 +1,100 @@
+program Ej3;
+const
+  valorAlto= 999999;
+type
+  producto = record
+    codigo: integer;
+    descripcion: String [40];
+    precio: real;
+    stocka: integer;
+    stockm: integer;
+  end;
+  pedido = record
+    codigo: integer;
+    cantpedida: integer;
+  end;
+  archproducto = file of producto;
+  archpedido = file of pedido;
+  vector = array [1..4] of archpedido;
+  vector2 = array [1..4] of pedido;
+procedure leer (var archivo:archpedido; var dato:pedido);
+begin
+  if (not eof(archivo))then
+    read (archivo,dato)
+  else
+    dato.codigo := valoralto;
+end;
+procedure minimo (var vecDetalle: vector2; var min: pedido; var v: vector; var pos: integer);
+var
+  i: integer;
+begin
+  min.codigo:= valorAlto;
+  for i:= 1 to 4 do
+  begin
+    if (vecDetalle[i].codigo<min.codigo) then
+    begin
+      min:= vecDetalle[i];
+      pos:= i;
+    end;
+  end;
+  leer(v[pos],vecDetalle[pos]);
+end;
+procedure actualizarStock(var regM: producto; var min: pedido; pos: integer);
+begin
+    regM.stocka:= regM.stocka-min.cantpedida;
+    if (regM.stocka<0) then
+    begin
+      write('La sucursal ', pos,' no pudo satisfacer su pedido. ');
+      writeln('Faltan ', Abs(regM.stocka), ' unidades de ', regM.descripcion);
+      regM.stocka:= 0;
+    end
+    else
+      writeln('La Sucursal ',pos,' pudo satisfaser su pedido de ', regM.descripcion);
+end;
+procedure actualizarMaestro (var maestro:archproducto; var v: vector);
+var
+  regM: producto;
+  regD: vector2;
+  i: integer;
+  pos: integer;
+  min: pedido;
+begin
+  for i:= 1 to 4 do
+      leer(v[i], regD[i]);
+  minimo(regD,min,v, pos);
+  while(min.codigo<>valorAlto) do
+  begin
+    read(maestro,regM);
+    while (regM.codigo <> min.codigo) do
+      read(maestro,regM);
+    writeln('Codigo: ', regM.codigo);
+    while (regM.codigo = min.codigo) do
+    begin
+      actualizarStock(regM,min, pos);
+      minimo(regD,min,v, pos);
+    end;
+    if (regM.stocka<regM.stockm) then
+       writeln('El stock de ',regM.descripcion,' esta por debajo del stock minimo');
+    seek(maestro,filePos(maestro)-1);
+    write(maestro,regM);
+  end;
+end;
+var
+  maestro: archproducto;
+  v : vector;
+  i: integer;
+begin
+  Assign(maestro, 'Empresa.dat');
+  Assign(v[1], 'Sucursal 1.dat');
+  Assign(v[2], 'Sucursal 2.dat');
+  Assign(v[3], 'Sucursal 3.dat');
+  Assign(v[4], 'Sucursal 4.dat');
+  Reset(maestro);
+  for i:= 1 to 4 do
+    Reset(v[i]);
+  actualizarMaestro(maestro,v);
+  for i:= 1 to 4 do
+    Close(v[i]);
+  Close(maestro);
+  readln();
+end.   
