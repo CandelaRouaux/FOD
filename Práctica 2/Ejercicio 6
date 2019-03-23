@@ -1,0 +1,71 @@
+program Ej6;
+const
+  valorAlto= 999999;
+type
+  cliente = record
+    codigo: integer;
+    nombre: String[30];
+    apellido: String [30];
+  end;
+  ventas = record
+    cli: cliente;
+    ano: 1900..2100;
+    mes: 1..12;
+    dia: 1..31;
+    monto: real;
+  end;
+  archventas = file of ventas;
+procedure leer(var archivo: archventas; var ven:ventas);
+begin
+  if(not eof(archivo))then
+    read(archivo, ven)
+  else
+    ven.cli.codigo:= valorAlto;
+end;
+
+procedure listarReporte(var archivo: archventas);
+var
+  ven: ventas;
+  actual: ventas;
+  montotal: real;
+  montomens: real;
+begin
+  leer(archivo, ven);
+  while(ven.cli.codigo<>valorAlto) do
+  begin
+    actual:= ven;
+    writeln('Codigo de Cliente: ', ven.cli.codigo);
+    writeln('Nombre: ', ven.cli.nombre);
+    writeln('Apellido: ', ven.cli.apellido);
+    while (actual.cli.codigo=ven.cli.codigo) do
+    begin
+      montotal:= 0;
+      actual.ano:=ven.ano;
+      writeln('Ano ', ven.ano);
+      while(actual.ano=ven.ano)and(actual.cli.codigo=ven.cli.codigo) do
+      begin
+        actual.mes:= ven.mes;
+        montomens:= 0;
+        while(actual.mes=ven.mes)and(actual.ano=ven.ano)and(actual.cli.codigo=ven.cli.codigo) do
+        begin
+          montotal:= montotal + ven.monto;
+          montomens:= montomens+ven.monto;
+          leer(archivo, ven);
+        end;
+        writeln('El monto del mes ', actual.mes, ' es: ', montomens:2:2);
+      end;
+      writeln('Monto total comprado en el ano: ', montotal:2:2);
+    end;
+    writeln();
+  end;
+end;
+var
+  archivo: archventas;
+begin
+  Assign(archivo, 'ventasclientes.dat');
+  Reset(archivo);
+  listarReporte(archivo);
+  Close(archivo);
+  readln();
+end.
+           
