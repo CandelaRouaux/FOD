@@ -1,0 +1,93 @@
+program Ej8;
+type
+  empleado = record
+    departamento: String[10];
+    division: String[10];
+    nroEmpleado: integer;
+    categoria: 1..15;
+    horasExtra: real;
+  end;
+  hora = record
+    division: real;
+    departamento:real;
+  end;
+  montotal = record
+    empleado:real;
+    division:real;
+    departamento:real;
+  end;
+  valores = array [1..15] of real;
+  aremple= file of empleado;
+procedure cargarVector(var carga:Text; var v:valores);
+var
+  indice: integer;
+  valor: real;
+begin
+  while (not eof(carga)) do
+  begin
+    read(carga,indice,valor);
+    v[indice]:= valor;
+  end;
+end;
+procedure leer (var archivo:aremple; var emp:empleado);
+begin
+  if not eof(archivo) then
+    read(archivo,emp)
+  else
+    emp.departamento:= '0';
+end;
+procedure listarEnPantalla (var archivo:aremple; v:valores);
+var
+  emp:empleado;
+  actual:empleado;
+  horas: hora;
+  monto: montotal;
+begin
+  leer(archivo,emp);
+  while(emp.departamento<>'0') do
+  begin
+    writeln('Departamento ', emp.departamento);
+    actual:= emp;
+    horas.departamento:= 0;
+    monto.departamento:= 0;
+    while(actual.departamento= emp.departamento) do
+    begin
+      writeln('Division ', emp.division);
+      actual.division:= emp.division;
+      horas.division:=0;
+      monto.division:=0;
+      while(actual.division=emp.division)and(actual.departamento=emp.departamento) do
+      begin
+        monto.empleado:=(emp.horasExtra*v[actual.categoria]);
+        writeln(actual.nroEmpleado, ' ', emp.horasExtra:2:2, ' horas extra ', '$', monto.empleado:2:2);
+        monto.division:= monto.division + monto.empleado;
+        horas.division:= horas.division + emp.horasExtra;
+        leer(archivo,emp);
+      end;
+      writeln('Total de horas de la division: ', horas.division:2:2);
+      writeln('Monto total de la division: $', monto.division:2:2);
+      monto.departamento:= monto.departamento + monto.division;
+      horas.departamento:= horas.departamento + horas.division;
+      writeln();
+    end;
+    writeln('Total de horas del departamento: ', horas.departamento:2:2);
+    writeln('Monto total del departamento: $', monto.departamento:2:2);
+    writeln();
+  end;
+end;
+var
+  archivo: aremple;
+  carga:Text;
+  vec: valores;
+begin
+  Assign(archivo, 'horasExtra.dat');
+  Assign(carga, 'valores.txt');
+  Reset(archivo);
+  Reset(carga);
+  cargarVector(carga, vec);
+  listarEnPantalla(archivo, vec);
+  Close(archivo);
+  Close(carga);
+  readln();
+end.
+                                          
