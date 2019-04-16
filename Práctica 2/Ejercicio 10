@@ -1,0 +1,87 @@
+program Ejercicio10;
+const
+  valorAlto= 9999999;
+type
+  accesos = record
+    ano: 1900..2100;
+    mes: 1..12;
+    dia: 1..31;
+    idUsuario: integer;
+    tiempoAcceso: real;
+  end;
+  total = record
+    tdia: real;
+    tmes: real;
+    tano: real;
+    tid: real;
+  end;
+  ar = file of accesos;
+procedure leer (var archivo:ar; var acc: accesos);
+begin
+  if (not eof(archivo)) then
+    read(archivo, acc)
+  else
+    acc.ano:= valorAlto
+end;
+procedure imprimirAno(var archivo:ar; var acc:accesos);
+var
+  actual:accesos;
+  tot:total;
+begin
+  writeln('Año: ', acc.ano);
+  actual.ano:= acc.ano;
+  tot.tano:= 0;
+  while (actual.ano = acc.ano)do
+  begin
+    actual.mes := acc.mes;
+    tot.tmes := 0;
+    writeln('Mes: ', acc.mes);
+    while (actual.mes = acc.mes)and(actual.ano= acc.ano)do
+    begin
+      actual.dia:= acc.dia;
+      tot.tdia:= 0;
+      writeln('Dia: ', acc.dia);
+      while (actual.dia = acc.dia)and(actual.mes = acc.mes)and (actual.ano= acc.ano)do
+      begin
+        actual.idUsuario := acc.idUsuario;
+        tot.tid := 0;
+        while (actual.idUsuario = acc.idUsuario)and(actual.dia = acc.dia)and(actual.mes = acc.mes)and (actual.ano= acc.ano)do
+        begin
+          tot.tid := tot.tid + acc.tiempoAcceso;
+          leer (archivo, acc);
+        end;
+        writeln(actual.idUsuario, ' ', tot.tid:2:2);
+        tot.tdia:= tot.tdia + tot.tid;
+      end;
+      writeln('Tiempo total acceso del dia: ', tot.tdia:2:2);
+      tot.tmes := tot.tmes + tot.tdia;
+    end;
+    writeln('Tiempo total acceso del mes: ', tot.tmes:2:2);
+    tot.tano := tot.tano + tot.tmes;
+  end;
+  writeln('Tiempo total acceso del año: ', tot.tano:2:2);
+end;
+procedure corteControl (var archivo: ar);
+var
+  acc:accesos;
+  ano: integer;
+begin
+  write('Ingrese el año a informar: ');
+  readln (ano);
+  leer(archivo, acc);
+  while (ano < acc.ano)do
+    leer (archivo,acc);
+  if (acc.ano = ano) then
+    imprimirAno(archivo,acc)
+  else
+    writeln('Año no encontrado');
+end;
+var
+  archivo: ar;
+begin
+  Assign(archivo, 'EmpresaX.dat');
+  Reset(archivo);
+  corteControl(archivo);
+  Close(archivo);
+  readln();
+end.  
