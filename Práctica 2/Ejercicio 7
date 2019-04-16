@@ -57,4 +57,4 @@ begin
   listarReporte(archivo);
   Close(archivo);
   readln();
-end.                                 
+end.                        
