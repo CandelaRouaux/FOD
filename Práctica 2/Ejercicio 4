@@ -5,7 +5,7 @@ type
   Fecha = record
     dia: 1..31;
     mes: 1..12;
-    ano: 1900..2018;
+    ano: 1900..2100;
   end;
   maquina = record
     cod_usuario: integer;
@@ -103,7 +103,7 @@ var
   v : vec1;
   i: integer;
 begin
-  Assign(maestro, 'MaestroEj4/var/log');
+  Assign(maestro, '/var/log/MaestroEj4');
   Assign(v[1], 'Maquina 1');
   Assign(v[2], 'Maquina 2');
   Assign(v[3], 'Maquina 3');
@@ -117,4 +117,4 @@ begin
     Close(v[i]);
   Close(maestro);
   readln();
-end.
+end. 
