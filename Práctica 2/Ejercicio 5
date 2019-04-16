@@ -125,8 +125,8 @@ var
   reporteMaestro: Text;
   reporteStockMinimo: Text;
 begin
-  Assign(maestro, 'Productos');
-  Assign(detalle, 'Ventas');
+  Assign(maestro, 'Productos.dat');
+  Assign(detalle, 'Ventas.dat');
   Assign(cargaMaestro, 'productos.txt');
   Assign(cargaDetalle, 'ventas.txt');
   Assign(reporteMaestro, 'reporte.txt');
@@ -158,4 +158,4 @@ begin
   end;
   writeln('El programa finalizo.');
 readln();
-end.                                                                          
+end.                                                                             
