@@ -24,7 +24,8 @@ begin
   Reset(carga);
   while (not eof(carga)) do
   begin
-    readln(carga, a.codigo, a.cursap, a.finap, a.apellido, a.nombre);
+    readln(carga, a.codigo, a.cursap, a.finap, a.apellido);
+    readln(carga, a.nombre);
     write(archivo, a);
   end;
   Close(archivo);
@@ -53,7 +54,7 @@ begin
   while(not eof(archivo)) do
   begin
     read(archivo, a);
-    writeln(carga, a.codigo,' ', a.cursap,' ',a.finap, a.apellido, a.nombre);
+    writeln(carga, a.codigo,' ', a.cursap,' ',a.finap, ' ', a.apellido,' ', a.nombre);
   end;
   Close(archivo);
   Close(carga);
@@ -97,7 +98,10 @@ begin
       if (ad.info=1) then
         am.cursap:=am.cursap+1
       else
+      begin
         am.finap:=am.finap+1;
+        am.cursap:= am.cursap -1;
+      end;
       leer(detalle,ad);
     end;
     seek(maestro, filePos(maestro)-1);
@@ -115,8 +119,8 @@ begin
    while(not eof(archivo)) do
    begin
      read(archivo,a);
-     if(a.cursap+4>a.finap) then
-       writeln(carga, a.codigo, ' ', a.cursap, ' ',a.finap,a.apellido, a.nombre);
+     if(a.cursap>4) then
+       writeln(carga, a.codigo, ' ', a.cursap, ' ',a.finap,' ',a.apellido,' ', a.nombre);
    end;
    Close(archivo);
    Close(carga);
@@ -165,4 +169,4 @@ begin
   end;
   writeln('El programa finalizo');
   readln();
-end.                                                                             
+end.                                                                           
