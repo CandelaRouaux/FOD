@@ -29,19 +29,19 @@ var
   actual: ventas;
   montotal: real;
   montomens: real;
-  motoanual: real;
+  montoanual: real;
 begin
   leer(archivo, ven);
+  montotal:= 0;
   while(ven.cli.codigo<>valorAlto) do
   begin
     actual:= ven;
     writeln('Codigo de Cliente: ', ven.cli.codigo);
     writeln('Nombre: ', ven.cli.nombre);
     writeln('Apellido: ', ven.cli.apellido);
-    montotal:= 0;
     while (actual.cli.codigo=ven.cli.codigo) do
     begin
-      monanual:= 0;
+      montoanual:= 0;
       actual.ano:=ven.ano;
       writeln('Ano ', ven.ano);
       while(actual.ano=ven.ano)and(actual.cli.codigo=ven.cli.codigo) do
@@ -70,5 +70,5 @@ begin
   listarReporte(archivo);
   Close(archivo);
   readln();
-end. 
+end.          
            
