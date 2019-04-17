@@ -1,0 +1,119 @@
+program Ej13;
+const
+  n = 40;
+  valorAlto = 999999;
+type
+  alumno = record
+    dni_alumno: String[9];
+    codigo_carrera: integer;
+    monto_total_pagado: real;
+  end;
+  rapiPago = record
+    dni_alumno: String[9];
+    codigo_carrera:integer;
+    monto_cuota: real;
+  end;
+  detalle = file of rapiPago;
+  maestro = file of alumno;
+  vecDetalles = array [1..n] of detalle;
+  vecRegistros = array [1..n] of rapiPago;
+procedure asignar (var vec: vecDetalles);
+var
+  strin: String[20];
+  i: integer;
+  valorI: String;
+begin
+  for i:= 1 to n do
+  begin
+    str(i, valorI);
+    strin:= 'detalle' +valorI + '.dat';
+    Assign(vec[i],strin);
+  end;
+end;
+procedure leer (var det: detalle;var reg: rapiPago);
+begin
+  if(not eof(det)) then
+    read(det, reg)
+  else
+    reg.codigo_carrera:= valorAlto;
+end;
+procedure minimo (var vec: vecDetalles;var regD: vecRegistros;var min: rapiPago);
+var
+  i: integer;
+  pos: integer;
+begin
+  min.dni_alumno:='999999999';
+  min.codigo_carrera:= 99999999;
+  for i:= 1 to n do
+  begin
+    if(regD[i].dni_alumno<min.dni_alumno) then
+    begin
+        min:= regD[i];
+        pos:= i;
+    end
+    else
+      if(regD[i].dni_alumno = min.dni_alumno) then
+        if(regD[i].codigo_carrera<min.codigo_carrera) then
+        begin
+          min:= regD[i];
+          pos:= i;
+        end;
+  end;
+  leer(vec[pos], regD[pos]);
+end;
+procedure actualizarMaestro (var mae: maestro;var vec:vecDetalles);
+var
+  min:rapiPago;
+  regM: alumno;
+  regD: vecRegistros;
+  i: integer;
+begin
+  Reset(mae);
+  for i:= 1 to n do
+  begin
+    Reset(vec[i]);
+    leer(vec[i], regD[i]);
+  end;
+  minimo(vec, regD, min);
+  while (min.codigo_carrera<>valorAlto) do
+  begin
+    read(mae, regM);
+    while(regM.codigo_carrera<>min.codigo_carrera) and(regM.dni_alumno<>min.dni_alumno) do
+      read(mae,regM);
+    while(regM.codigo_carrera=min.codigo_carrera) and(regM.dni_alumno=min.dni_alumno) do
+    begin
+      regM.monto_total_pagado:= regM.monto_total_pagado + min.monto_cuota;
+      minimo(vec,regD,min);
+    end;
+  end;
+  Close(mae);
+  for i:= 1 to n do
+    Close(vec[i]);
+end;
+procedure listarMaestro(var mae: maestro; var carga: Text);
+var
+  regM: alumno;
+begin
+  Reset(mae);
+  Rewrite(carga);
+  while(not eof(mae)) do
+  begin
+    read(mae,regM);
+    writeln(carga, regM.dni_alumno, ' ', regM.codigo_carrera, ' ', regM.monto_total_pagado);
+  end;
+  Close(mae);
+  Close(carga);
+end;
+var
+  mae: maestro;
+  vec: vecDetalles;
+  i:integer;
+  carga: Text;
+begin
+  Assign(mae, 'maestrito.dat');
+  Assign(carga, 'maeRapiPago.txt');
+  asignar(vec);
+  actualizarMaestro(mae,vec);
+  listarMaestro(mae, carga);
+end.
+                                            
