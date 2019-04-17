@@ -1,0 +1,77 @@
+program Ej9;
+type
+  alfab = record
+    prov: String[20];
+    cantAlf: integer;
+    totEncues: integer;
+  end;
+  alfa2= record
+    prov: String[20];
+    codLoc: integer;
+    cantAlf: integer;
+    totEncues:integer;
+  end;
+  archmaestro= file of alfab;
+  archdetalle= file of alfa2;
+procedure leer (var archivo:archdetalle; var reg:alfa2);
+begin
+  if(not eof (archivo)) then
+    read(archivo,reg)
+  else
+    reg.prov:='zzzz';
+end;
+
+procedure minimo (var det1,det2:archdetalle; var reg1,reg2:alfa2; var min:alfa2);
+begin
+  if (reg1.prov<=reg2.prov) then
+  begin
+    min := reg1;
+    leer(det1,reg1)
+  end
+  else
+  begin
+    min := reg2;
+    leer(det2,reg2);
+  end;
+end;
+procedure actualizarMaestro (var maestro:archmaestro; var det1:archdetalle; var det2:archdetalle);
+var
+  regM:alfab;
+  regD1:alfa2;
+  regD2:alfa2;
+  min:alfa2;
+begin
+  leer(det1,regD1);
+  leer(det2,regD2);
+  minimo(det1,det2,regD1,regD2,min);
+  while (min.prov<>'zzzz')do
+  begin
+    read(maestro, regM);
+    while(regM.prov<>min.prov) do
+      read(maestro,regM);
+    while(regM.prov=min.prov) do
+    begin
+      regM.cantAlf:=regM.cantAlf + min.cantAlf;
+      regM.totEncues:=regM.totEncues + min.totEncues;
+      minimo(det1,det2,regD1,regD2,min);
+    end;
+    seek(maestro, filePos(maestro)-1);
+    write(maestro,regM);
+  end;
+end;
+var
+  maestro: archmaestro;
+  detalle1:archdetalle;
+  detalle2:archdetalle;
+begin
+  Assign(maestro, 'alfabetizacion.dat');
+  Assign(detalle1,'alfa1.dat');
+  Assign(detalle2, 'alfa2.dat');
+  Reset(maestro);
+  Reset(detalle1);
+  Reset(detalle2);
+  actualizarMaestro(maestro,detalle1,detalle2);
+  Close(maestro);
+  Close(detalle1);
+  Close(detalle2);
+end. 
