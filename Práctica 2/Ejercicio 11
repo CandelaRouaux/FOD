@@ -1,0 +1,88 @@
+program Ej11;
+const
+  valorAlto=9999;
+type
+  server = record
+    nro_usuario: integer;
+    nombreUsuario: String[20];
+    nombre: String[20];
+    apellido: String[20];
+    cantidadMailEnviados: integer;
+  end;
+  diario = record
+    nro_usuario: integer;
+    cuentaDestino: String[30];
+    cuerpoMensaje: String[140];
+  end;
+  armaestro = file of server;
+  ardetalle = file of diario;
+procedure leer (var archivo: ardetalle;var reg: diario);
+begin
+  if(not eof(archivo)) then
+    read(archivo,reg)
+  else
+    reg.nro_usuario:= valorAlto;
+end;
+procedure actualizarMaestro(var maestro:armaestro;var detalle:ardetalle);
+var
+  regM:server;
+  regD:diario;
+begin
+  Reset(maestro);
+  Reset(detalle);
+  leer(detalle,regD);
+  while(regD.nro_usuario<>valorAlto) do
+  begin
+    read(maestro,regM);
+    while(regM.nro_usuario<>regD.nro_usuario) do
+      read(maestro,regM);
+    while(regM.nro_usuario = regD.nro_usuario) do
+    begin
+      regM.cantidadMailEnviados:=regM.cantidadMailEnviados+1;
+      leer(detalle,regD);
+    end;
+  end;
+  Close(maestro);
+  Close(detalle);
+end;
+procedure informeDetalle (var maestro:armaestro;var detalle:ardetalle);
+var
+  regM:server;
+  regD:diario;
+  mensajes: integer;
+begin
+  Reset(maestro);
+  Reset(detalle);
+  leer(detalle, regD);
+  while(regD.nro_usuario<>valorAlto)or(not eof(maestro)) do
+  begin
+    read(maestro,regM);
+    writeln('Numero de usuario: ', regM.nro_usuario);
+    while(regM.nro_usuario<>regD.nro_usuario)and (not eof(maestro))do
+    begin
+      writeln('La cantidad de mensajes enviados es 0');
+      read(maestro, regM);
+      writeln('Numero de usuario: ', regM.nro_usuario);
+    end;
+    mensajes:= 0;
+    while(regM.nro_usuario=regD.nro_usuario) do
+    begin
+      mensajes:= mensajes +1;
+      leer(detalle,regD);
+    end;
+    writeln('La cantidad de mensajes enviados es ', mensajes);
+  end;
+  Close(maestro);
+  Close(detalle);
+end;
+
+var
+  maestro: armaestro;
+  detalle: ardetalle;
+begin
+  Assign(maestro,'mails.dat');
+  Assign(detalle,'det.dat');
+  actualizarMaestro(maestro,detalle);
+  informeDetalle(maestro,detalle);
+  readln();
+end. 
