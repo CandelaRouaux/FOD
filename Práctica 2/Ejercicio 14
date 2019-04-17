@@ -1,0 +1,114 @@
+program Ej14;
+const
+  valorAlto = 999999;
+type
+  emision = record
+    fecha: String[10];
+    codigo_semanario: integer;
+    nombre_semanario: String [20];
+    descripcion: String [20];
+    precio: real;
+    tot_ejemplares: integer;
+    tot_ejemplares_vendidos: integer;
+  end;
+  venta = record
+    fecha: String[10];
+    codigo_semanario: integer;
+    tot_ejemplares_vendidos: integer;
+  end;
+  detalle = file of venta;
+  maestro = file of emision;
+  vecDetalles = array [1..100] of detalle;
+  vecRegistros = array [1..100] of venta;
+procedure asignar (var vec: vecDetalles);
+var
+  strin: String[20];
+  i: integer;
+  valorI: String;
+begin
+  for i:= 1 to 100 do
+  begin
+    str(i, valorI);
+    strin:= 'detalle' +valorI + '.dat';
+    Assign(vec[i],strin);
+  end;
+end;
+procedure leer (var det: detalle;var reg: venta);
+begin
+  if(not eof(det)) then
+    read(det, reg)
+  else
+    reg.codigo_semanario:= valorAlto;
+end;
+procedure minimo (var vec: vecDetalles;var regD: vecRegistros;var min: venta);
+var
+  i: integer;
+  pos: integer;
+begin
+  min.codigo_semanario := 999999;
+  min.fecha:= '9999999999';
+  for i:= 1 to 100 do
+  begin
+    if(regD[i].fecha<min.fecha) then
+    begin
+        min:= regD[i];
+        pos:= i;
+    end
+    else
+      if(regD[i].fecha = min.fecha) then
+        if(regD[i].codigo_semanario<min.codigo_semanario) then
+        begin
+          min:= regD[i];
+          pos:= i;
+        end;
+  end;
+  leer(vec[pos], regD[pos]);
+end;
+procedure actualizarMaestro (var mae: maestro;var vec:vecDetalles);
+var
+  min:venta;
+  regM: emision;
+  regD: vecRegistros;
+  i: integer;
+  maxVenta: emision;
+  minVenta: emision;
+begin
+  Reset(mae);
+  maxVenta.tot_ejemplares_vendidos:= -1;
+  minVenta.tot_ejemplares_vendidos:= 999999;
+  for i:= 1 to 100 do
+  begin
+    Reset(vec[i]);
+    leer(vec[i], regD[i]);
+  end;
+  minimo(vec, regD, min);
+  while (min.codigo_semanario<>valorAlto) do
+  begin
+    read(mae, regM);
+    while(regM.codigo_semanario<>min.codigo_semanario) and(regM.fecha<>min.fecha) do
+      read(mae,regM);
+    while(regM.codigo_semanario=min.codigo_semanario) and(regM.fecha=min.fecha) do
+    begin
+      regM.tot_ejemplares_vendidos:= regM.tot_ejemplares_vendidos + min.tot_ejemplares_vendidos;
+      minimo(vec,regD,min);
+    end;
+    if (regM.tot_ejemplares_vendidos>maxVenta.tot_ejemplares_vendidos)then
+       maxVenta:= regM
+    else
+      if(regM.tot_ejemplares_vendidos<minVenta.tot_ejemplares_vendidos) then
+        minVenta:= regM;
+    seek (mae, filePos(mae)-1);
+    write(mae, regM);
+  end;
+  Close(mae);
+  for i:= 1 to 100 do
+    Close(vec[i]);
+end;
+var
+  mae: maestro;
+  vec: vecDetalles;
+begin
+  Assign(mae, 'semanarios.dat');
+  asignar(vec);
+  actualizarMaestro(mae,vec);
+end.  
