@@ -80,7 +80,7 @@ var
   maestro: armaestro;
   detalle: ardetalle;
 begin
-  Assign(maestro,'mails.dat');
+  Assign(maestro,'/var/log/logmail.dat');
   Assign(detalle,'det.dat');
   actualizarMaestro(maestro,detalle);
   informeDetalle(maestro,detalle);
