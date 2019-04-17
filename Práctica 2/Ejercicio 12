@@ -1,0 +1,137 @@
+program Ej12;
+const
+  valorAlto = 'zzzz';
+type
+  fecha = record
+    dia: 1..31;
+    mes:1..12;
+    ano:1990..2100;
+  end;
+  vuelos = record
+    destino: String[20];
+    fechaVuelo: fecha;
+    horaSalida: real;
+    cantDisponibles: integer;
+  end;
+  ventas = record
+    destino: String[20];
+    fechaVuelo: fecha;
+    horaSalida: real;
+    cantComprados: integer;
+  end;
+  archmaestro=file of vuelos;
+  archdetalle=file of ventas;
+procedure leer (var archivo: archdetalle; var regD: ventas);
+begin
+  if(not eof(archivo))then
+    read(archivo,regD)
+  else
+    regD.destino:=valorAlto;
+end;
+procedure esUno (var det1: archdetalle; var regD1:ventas; var min:ventas);
+begin
+  min:= regD1;
+  leer(det1,regD1);
+end;
+procedure esDos (var det2: archdetalle; var regD2:ventas; var min:ventas);
+begin
+   min:= regD2;
+   leer(det2, regD2);
+end;
+function comparar(fecha1:fecha;fecha2:fecha):integer;
+begin
+  if(fecha1.ano<fecha2.ano) then
+    comparar:= -1
+  else
+    if(fecha1.ano>fecha2.ano) then
+      comparar:= 1
+    else
+      if(fecha1.mes<fecha2.mes) then
+        comparar:= -1
+      else
+        if(fecha1.mes>fecha2.mes) then
+          comparar:= 1
+        else
+          if(fecha1.dia<fecha2.dia)then
+            comparar:= -1
+          else
+            if(fecha1.dia>fecha2.dia) then
+              comparar:= 1
+            else
+              comparar:= 0;
+end;
+procedure minimo (var det1,det2: archdetalle;var regD1,regD2:ventas;var min: ventas);
+var
+  fechas: integer;
+begin
+  if(regD1.destino<regD2.destino)then
+    esUno(det1,regD1,min)
+  else
+    if(regD2.destino<regD1.destino) then
+      esDos(det2,regD2,min)
+    else
+    begin
+      fechas:= comparar(regD1.fechaVuelo, regD2.fechaVuelo); {devuelve 0 si son iguales, -1 si regD1 es menor y 1 si regD1 es mayor}
+      if(fechas>0) then
+        esUno(det1,regD1,min)
+      else
+        if(fechas<0) then
+          esDos(det2,regD2,min)
+        else
+          if(regD1.horaSalida>=regD2.horaSalida) then
+            esUno(det1,regD1,min)
+          else
+            esDos(det2,regD2,min);
+    end;
+end;
+function sonIguales(regM: vuelos; regD: ventas): boolean;
+begin
+  sonIguales:=((regM.destino=regD.destino)and(comparar(regM.fechaVuelo,regD.fechaVuelo)=0)and(regM.horaSalida=regD.horaSalida))
+end;
+procedure actualizarMaestro(var maestro: archmaestro; var det1,det2: archdetalle);
+var
+  regD1: ventas;
+  regD2: ventas;
+  min: ventas;
+  regM: vuelos;
+  asientos: integer;
+begin
+  write('Ingrese la cantidad minima de asientos disponibles: ');
+  readln(asientos);
+  writeln('Vuelos con menos asientos disponibles que la cantidad minima: ');
+  leer(det1,regD1);
+  leer(det2,regD2);
+  minimo(det1,det2,regD1,regD2,min);
+  while (min.destino<>valorAlto) do
+  begin
+     read(maestro,regM);
+     while(not sonIguales(regM,min))do  {compara los 3 primeros campos de cada registro y devuelve true solo si son iguales}
+       read(maestro,regM);
+     while(sonIguales(regM,min)) do
+     begin
+       regM.cantDisponibles:=regM.cantDisponibles - min.cantComprados;
+       minimo(det1,det2,regD1,regD2,min);
+     end;
+     if(regM.cantDisponibles<asientos) then
+     begin
+       writeln(regM.destino, ' ', regM.fechaVuelo.dia,'/', regM.fechaVuelo.mes,'/',regM.fechaVuelo.ano, ' ',regM.horaSalida);
+     end;
+  end;
+end;
+
+var
+  maestro: archmaestro;
+  detalle1:archdetalle;
+  detalle2:archdetalle;
+begin
+  Assign(maestro, 'vuelos.dat');
+  Assign(detalle1, 'vuelosVendidos1.dat');
+  Assign(detalle2, 'vuelosVendidos2.dat');
+  Reset(maestro);
+  Reset(detalle1);
+  Reset(detalle2);
+  actualizarMaestro(maestro,detalle1,detalle2);
+  Close(maestro);
+  Close(detalle1);
+  Close(detalle2);
+end.  
