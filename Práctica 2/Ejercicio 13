@@ -85,6 +85,8 @@ begin
       regM.monto_total_pagado:= regM.monto_total_pagado + min.monto_cuota;
       minimo(vec,regD,min);
     end;
+    seek (mae,filePos(mae)-1);
+    write(mae, regM);
   end;
   Close(mae);
   for i:= 1 to n do
@@ -115,5 +117,5 @@ begin
   asignar(vec);
   actualizarMaestro(mae,vec);
   listarMaestro(mae, carga);
-end.
+end.   
                                             
